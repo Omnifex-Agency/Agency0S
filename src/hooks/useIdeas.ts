@@ -1,3 +1,5 @@
+"use client"
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
@@ -5,15 +7,24 @@ import { IdeaFormValues } from "@/lib/validations/idea"
 import { useWorkspace } from "@/hooks/useWorkspace"
 import { logActivity } from "@/lib/logger"
 
+/* -------------------------------------------------------------------------- */
+/*                                    Types                                   */
+/* -------------------------------------------------------------------------- */
+
 type Idea = Database["public"]["Tables"]["ideas"]["Row"]
 type IdeaInsert = Database["public"]["Tables"]["ideas"]["Insert"]
+
+/* -------------------------------------------------------------------------- */
+/*                                   Queries                                  */
+/* -------------------------------------------------------------------------- */
 
 export function useIdeas() {
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
-    return useQuery({
+    return useQuery<Idea[]>({
         queryKey: ["workspace", workspaceId, "ideas"],
+        enabled: !!workspaceId,
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
@@ -23,16 +34,15 @@ export function useIdeas() {
                 .order("created_at", { ascending: false })
 
             if (error) throw error
-            return data as Idea[]
+            return data ?? []
         },
-        enabled: !!workspaceId,
     })
 }
 
 export function useIdea(id: string) {
-
-    return useQuery({
+    return useQuery<Idea>({
         queryKey: ["idea", id],
+        enabled: !!id,
         queryFn: async () => {
             const { data, error } = await supabase
                 .from("ideas")
@@ -41,11 +51,14 @@ export function useIdea(id: string) {
                 .single()
 
             if (error) throw error
-            return data as Idea
+            return data
         },
-        enabled: !!id,
     })
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                   Mutations                                 */
+/* -------------------------------------------------------------------------- */
 
 export function useCreateIdea() {
     const queryClient = useQueryClient()
@@ -55,6 +68,7 @@ export function useCreateIdea() {
     return useMutation({
         mutationFn: async (values: IdeaFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
+
             const { data, error } = await supabase
                 .from("ideas")
                 .insert({
@@ -67,18 +81,19 @@ export function useCreateIdea() {
             if (error) throw error
             return data
         },
-        onSuccess: (data: any) => {
-            if (workspaceId) {
-                logActivity({
-                    action: "created",
-                    entityType: "idea",
-                    entityId: data.id,
-                    entityName: data.title,
-                    workspaceId: workspaceId,
-                })
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "ideas"] })
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
-            }
+        onSuccess: (data) => {
+            if (!workspaceId) return
+
+            logActivity({
+                action: "created",
+                entityType: "idea",
+                entityId: data.id,
+                entityName: data.title,
+                workspaceId: workspaceId,
+            })
+
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "ideas"] })
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
         },
     })
 }
@@ -101,7 +116,7 @@ export function useUpdateIdea() {
             if (error) throw error
             return data
         },
-        // Optimistic Update
+        /* ----------------------------- Optimistic UI ----------------------------- */
         onMutate: async ({ id, values }) => {
             if (!workspaceId) return
             await queryClient.cancelQueries({ queryKey: ["workspace", workspaceId, "ideas"] })
@@ -114,12 +129,13 @@ export function useUpdateIdea() {
             }
             return { previousIdeas }
         },
-        onError: (err, newIdea, context) => {
-            if (context?.previousIdeas) {
+        onError: (_err, _vars, context) => {
+            if (context?.previousIdeas && workspaceId) {
                 queryClient.setQueryData(["workspace", workspaceId, "ideas"], context.previousIdeas)
             }
         },
         onSettled: () => {
+            if (!workspaceId) return
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "ideas"] })
             queryClient.invalidateQueries({ queryKey: ["idea"] })
         },
