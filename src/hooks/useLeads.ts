@@ -54,10 +54,10 @@ export function useCreateLead() {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
                 .from("leads")
-                .insert({
+                .insert([{
                     ...values,
                     workspace_id: workspaceId,
-                })
+                }])
                 .select()
                 .single()
 

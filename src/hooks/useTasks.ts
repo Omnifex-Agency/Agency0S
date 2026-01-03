@@ -46,11 +46,11 @@ export function useCreateTask() {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
                 .from("tasks")
-                .insert({
+                .insert([{
                     ...values,
                     workspace_id: workspaceId,
                     due_date: values.due_date ? new Date(values.due_date).toISOString() : null,
-                })
+                }])
                 .select()
                 .single()
 

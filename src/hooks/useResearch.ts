@@ -57,10 +57,10 @@ export function useCreateResearchDoc() {
             if (!workspace?.id) throw new Error("No workspace")
             const { data, error } = await supabase
                 .from("research")
-                .insert({
+                .insert([{
                     ...doc,
                     workspace_id: workspace.id,
-                })
+                }])
                 .select()
                 .single()
 
@@ -106,7 +106,7 @@ export function useUpdateResearchDoc() {
     return useMutation({
         mutationFn: async ({ id, updates }: { id: string; updates: Partial<NewResearchDoc> }) => {
             const { data, error } = await supabase
-                .from("research_docs" as any)
+                .from("research")
                 .update({ ...updates, updated_at: new Date().toISOString() })
                 .eq("id", id)
                 .select()

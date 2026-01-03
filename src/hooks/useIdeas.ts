@@ -69,12 +69,24 @@ export function useCreateIdea() {
         mutationFn: async (values: IdeaFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
 
+            const payload: IdeaInsert = {
+                workspace_id: workspaceId,
+                title: values.title,
+                status: values.status,
+                template_type: values.template_type,
+                problem: values.problem ?? null,
+                insight: values.insight ?? null,
+                hypothesis: values.hypothesis ?? null,
+                tags: values.tags ?? [],
+                execution_plan: values.execution_plan ?? null,
+                metrics: values.metrics ?? null,
+                risks: values.risks ?? null,
+                next_steps: values.next_steps ?? null,
+            }
+
             const { data, error } = await supabase
                 .from("ideas")
-                .insert({
-                    ...values,
-                    workspace_id: workspaceId,
-                } satisfies IdeaInsert)
+                .insert([payload])
                 .select()
                 .single()
 

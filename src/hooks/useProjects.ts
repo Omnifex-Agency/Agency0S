@@ -64,12 +64,12 @@ export function useCreateProject() {
 
             const { data, error } = await supabase
                 .from("projects")
-                .insert({
+                .insert([{
                     ...values,
                     workspace_id: workspaceId,
                     start_date: startDate,
                     end_date: endDate,
-                })
+                }])
                 .select()
                 .single()
 

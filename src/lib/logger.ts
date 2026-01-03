@@ -19,7 +19,7 @@ export async function logActivity(params: LogActivityParams) {
 
     const userName = user.user_metadata?.full_name || user.email || "Unknown"
 
-    const { error } = await supabase.from('activity_log').insert({
+    const { error } = await supabase.from('activity_log').insert([{
         workspace_id: params.workspaceId,
         user_id: user.id,
         user_name: userName,
@@ -29,7 +29,7 @@ export async function logActivity(params: LogActivityParams) {
         entity_name: params.entityName,
         client_id: params.clientId,
         metadata: params.metadata || {}
-    } as any)
+    }] as any)
 
     if (error) {
         console.error("Failed to log activity:", error)

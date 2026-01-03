@@ -56,10 +56,10 @@ export function useCreateTarget() {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
                 .from("targets")
-                .insert({
+                .insert([{
                     ...values,
                     workspace_id: workspaceId,
-                })
+                }])
                 .select()
                 .single()
 
