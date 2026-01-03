@@ -3,25 +3,20 @@ import { createClient } from "@/lib/supabase/client"
 import { Database } from "@/types/database"
 import { TaskFormValues } from "@/lib/validations/task"
 import { useWorkspace } from "@/hooks/useWorkspace"
-import { logActivity } from "@/lib/logger"
-import { notify } from "@/app/(app)/notify/actions"
 
 type Task = Database["public"]["Tables"]["tasks"]["Row"]
 
 export function useTasks(filters?: { clientId?: string; projectId?: string }) {
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
-    // Unified Query Key: ['workspace', workspaceId, 'tasks', filters]
-    const queryKey = ["workspace", workspaceId, "tasks", filters] as const
-
     return useQuery({
-        queryKey,
+        queryKey: ["workspace", workspaceId, "tasks", filters],
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             let query = supabase
-                .from("tasks")
+                .from("tasks" as any)
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -29,7 +24,6 @@ export function useTasks(filters?: { clientId?: string; projectId?: string }) {
             if (filters?.clientId) {
                 query = query.eq("client_id", filters.clientId)
             }
-
             if (filters?.projectId) {
                 query = query.eq("project_id", filters.projectId)
             }
@@ -45,54 +39,36 @@ export function useTasks(filters?: { clientId?: string; projectId?: string }) {
 
 export function useCreateTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
     return useMutation({
         mutationFn: async (values: TaskFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
-            // Process date to ensure it's valid format or null
-            const dueDate = values.due_date ? new Date(values.due_date).toISOString() : null
-
             const { data, error } = await supabase
-                .from("tasks")
+                .from("tasks" as any)
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                    assignee_id: values.assignee_id || null,
-                    client_id: values.client_id || null,
-                    project_id: values.project_id || null,
-                    due_date: dueDate,
-                    status: values.status || "todo", // Default
-                })
+                    due_date: values.due_date ? new Date(values.due_date).toISOString() : null,
+                } as any)
                 .select()
                 .single()
 
             if (error) throw error
             return data
         },
-        onSuccess: (data) => {
-            if (workspaceId) {
-                logActivity({
-                    action: "created",
-                    entityType: "task",
-                    entityId: data.id,
-                    entityName: data.title,
-                    workspaceId: workspaceId,
-                    clientId: data.client_id || undefined,
-                    metadata: { project_id: data.project_id }
-                })
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
-            }
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
         },
     })
 }
 
 export function useUpdateTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -100,17 +76,11 @@ export function useUpdateTask() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<TaskFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const updates: any = { ...values }
-
-            if (values.due_date !== undefined) {
-                updates.due_date = values.due_date ? new Date(values.due_date).toISOString() : null
-            }
-            if (values.assignee_id !== undefined) updates.assignee_id = values.assignee_id || null
-            if (values.client_id !== undefined) updates.client_id = values.client_id || null
-            if (values.project_id !== undefined) updates.project_id = values.project_id || null
+            if (values.due_date) updates.due_date = new Date(values.due_date).toISOString()
 
             const { data, error } = await supabase
-                .from("tasks")
-                .update(updates)
+                .from("tasks" as any)
+                .update(updates as any)
                 .eq("id", id)
                 .select()
                 .single()
@@ -121,51 +91,59 @@ export function useUpdateTask() {
         // Optimistic Update
         onMutate: async ({ id, values }) => {
             if (!workspaceId) return
-
             await queryClient.cancelQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
-            const previousData = queryClient.getQueriesData({ queryKey: ["workspace", workspaceId, "tasks"] })
+            const previousTasks = queryClient.getQueryData<Task[]>(["workspace", workspaceId, "tasks"])
 
-            queryClient.setQueriesData({ queryKey: ["workspace", workspaceId, "tasks"] }, (old: Task[] | undefined) => {
-                if (!old) return []
-                return old.map((t) => (t.id === id ? { ...t, ...values } : t))
-            })
+            if (previousTasks) {
+                queryClient.setQueryData<Task[]>(["workspace", workspaceId, "tasks"], (old) =>
+                    old ? old.map((t) => (t.id === id ? { ...t, ...values } : t)) : []
+                )
+            }
+            return { previousTasks }
+        },
+        onError: (err, newTask, context) => {
+            if (context?.previousTasks) {
+                queryClient.setQueryData(["workspace", workspaceId, "tasks"], context.previousTasks)
+            }
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
+            queryClient.invalidateQueries({ queryKey: ["task"] })
+        },
+    })
+}
 
-            return { previousData }
+export function useToggleTask() {
+    const queryClient = useQueryClient()
+    const supabase = createClient() as any
+    const { workspace } = useWorkspace()
+    const workspaceId = workspace?.id
+
+    return useMutation({
+        mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
+            if (!workspaceId) throw new Error("Workspace ID missing")
+            const { data, error } = await supabase
+                .from("tasks" as any)
+                .update({
+                    status: completed ? "completed" : "todo",
+                    completed_at: completed ? new Date().toISOString() : null,
+                } as any)
+                .eq("id", id)
+                .select()
+                .single()
+
+            if (error) throw error
+            return data
         },
-        onError: (err, newTodo, context) => {
-            if (context?.previousData) {
-                context.previousData.forEach(([queryKey, data]) => {
-                    queryClient.setQueryData(queryKey, data)
-                })
-            }
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
         },
-        onSettled: (data) => {
-            if (workspaceId && data) {
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
-                queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
-            }
-        },
-        onSuccess: (data, variables) => {
-            if (workspaceId) {
-                if (variables.values.status === "done") {
-                    notify(`✅ Task Done: <b>${data.title}</b>`)
-                }
-                logActivity({
-                    action: "updated",
-                    entityType: "task",
-                    entityId: data.id,
-                    entityName: data.title,
-                    workspaceId: workspaceId,
-                    clientId: data.client_id || undefined,
-                })
-            }
-        }
     })
 }
 
 export function useDeleteTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -173,7 +151,7 @@ export function useDeleteTask() {
         mutationFn: async (id: string) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { error } = await supabase
-                .from("tasks")
+                .from("tasks" as any)
                 .delete()
                 .eq("id", id)
 
@@ -181,7 +159,6 @@ export function useDeleteTask() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "tasks"] })
-            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
         },
     })
 }

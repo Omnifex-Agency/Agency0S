@@ -8,7 +8,7 @@ import { logActivity } from "@/lib/logger"
 type Idea = Database["public"]["Tables"]["ideas"]["Row"]
 
 export function useIdeas() {
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -17,7 +17,7 @@ export function useIdeas() {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("ideas")
+                .from("ideas" as any)
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -30,13 +30,13 @@ export function useIdeas() {
 }
 
 export function useIdea(id: string) {
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["idea", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("ideas")
+                .from("ideas" as any)
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -50,7 +50,7 @@ export function useIdea(id: string) {
 
 export function useCreateIdea() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -58,18 +58,18 @@ export function useCreateIdea() {
         mutationFn: async (values: IdeaFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("ideas")
+                .from("ideas" as any)
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                })
+                } as any)
                 .select()
                 .single()
 
             if (error) throw error
             return data
         },
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
             if (workspaceId) {
                 logActivity({
                     action: "created",
@@ -87,7 +87,7 @@ export function useCreateIdea() {
 
 export function useUpdateIdea() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -95,8 +95,8 @@ export function useUpdateIdea() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<IdeaFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("ideas")
-                .update(values)
+                .from("ideas" as any)
+                .update(values as any)
                 .eq("id", id)
                 .select()
                 .single()

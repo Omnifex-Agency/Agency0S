@@ -11,7 +11,7 @@ export type LogActivityParams = {
 }
 
 export async function logActivity(params: LogActivityParams) {
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     // Get current user
     const { data: { user } } = await supabase.auth.getUser()
@@ -30,7 +30,7 @@ export async function logActivity(params: LogActivityParams) {
         entity_name: params.entityName,
         client_id: params.clientId,
         metadata: params.metadata || {}
-    })
+    } as any)
 
     if (error) {
         console.error("Failed to log activity:", error)

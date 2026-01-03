@@ -9,7 +9,7 @@ import { notify } from "@/app/(app)/notify/actions"
 type Target = Database["public"]["Tables"]["targets"]["Row"]
 
 export function useTargets() {
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -18,7 +18,7 @@ export function useTargets() {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets")
+                .from("targets" as any)
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -31,13 +31,13 @@ export function useTargets() {
 }
 
 export function useTarget(id: string) {
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["target", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("targets")
+                .from("targets" as any)
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -51,7 +51,7 @@ export function useTarget(id: string) {
 
 export function useCreateTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -59,18 +59,18 @@ export function useCreateTarget() {
         mutationFn: async (values: TargetFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets")
+                .from("targets" as any)
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                })
+                } as any)
                 .select()
                 .single()
 
             if (error) throw error
             return data
         },
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
             if (workspaceId) {
                 logActivity({
                     action: "created",
@@ -89,7 +89,7 @@ export function useCreateTarget() {
 
 export function useCreateTargets() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -103,14 +103,14 @@ export function useCreateTargets() {
             }))
 
             const { data, error } = await supabase
-                .from("targets")
-                .insert(toInsert)
+                .from("targets" as any)
+                .insert(toInsert as any)
                 .select()
 
             if (error) throw error
             return data
         },
-        onSuccess: (data) => {
+        onSuccess: (data: any) => {
             if (workspaceId && data) {
                 logActivity({
                     action: "bulk_created",
@@ -131,7 +131,7 @@ export function useCreateTargets() {
 
 export function useUpdateTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -139,8 +139,8 @@ export function useUpdateTarget() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<TargetFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets")
-                .update(values)
+                .from("targets" as any)
+                .update(values as any)
                 .eq("id", id)
                 .select()
                 .single()
@@ -166,7 +166,7 @@ export function useUpdateTarget() {
                 queryClient.setQueryData(["workspace", workspaceId, "targets"], context.previousTargets)
             }
         },
-        onSuccess: (data, variables) => {
+        onSuccess: (data: any, variables: any) => {
             if (variables.values.status) {
                 notify(`🔁 Target moved: <b>${data.company_name}</b> → ${variables.values.status}`)
             }
@@ -180,7 +180,7 @@ export function useUpdateTarget() {
 
 export function useConvertTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -190,12 +190,12 @@ export function useConvertTarget() {
             const { data, error } = await supabase.rpc('convert_target_to_client', {
                 p_target_id: target.id,
                 p_workspace_id: workspaceId
-            })
+            } as any)
 
             if (error) throw error
             return data
         },
-        onSuccess: (data, target) => {
+        onSuccess: (data: any, target: any) => {
             notify(`🚀 Target Converted: <b>${target.company_name}</b>`)
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "targets"] })
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "clients"] })

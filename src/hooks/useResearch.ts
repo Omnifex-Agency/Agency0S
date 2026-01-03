@@ -29,7 +29,7 @@ export type NewResearchDoc = {
 
 export function useResearchDocs() {
     const { workspace } = useWorkspace()
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["research_docs", workspace?.id],
@@ -50,7 +50,7 @@ export function useResearchDocs() {
 
 export function useCreateResearchDoc() {
     const { workspace } = useWorkspace()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const queryClient = useQueryClient()
     const { toast } = useToast()
 
@@ -84,7 +84,7 @@ export function useCreateResearchDoc() {
 }
 
 export function useResearchDoc(id: string) {
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["research_doc", id],
@@ -103,7 +103,7 @@ export function useResearchDoc(id: string) {
 }
 
 export function useUpdateResearchDoc() {
-    const supabase = createClient()
+    const supabase = createClient() as any
     const queryClient = useQueryClient()
     const { toast } = useToast()
 

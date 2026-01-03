@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/client"
 import { Database } from "@/types/database"
 import { LeadFormValues } from "@/lib/validations/lead"
 import { useWorkspace } from "@/hooks/useWorkspace"
-import { notify } from "@/app/(app)/notify/actions"
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"]
 
 export function useLeads() {
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -17,7 +16,7 @@ export function useLeads() {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads")
+                .from("leads" as any)
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -30,13 +29,13 @@ export function useLeads() {
 }
 
 export function useLead(id: string) {
-    const supabase = createClient()
+    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["lead", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("leads")
+                .from("leads" as any)
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -50,7 +49,7 @@ export function useLead(id: string) {
 
 export function useCreateLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -58,19 +57,18 @@ export function useCreateLead() {
         mutationFn: async (values: LeadFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads")
+                .from("leads" as any)
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                })
+                } as any)
                 .select()
                 .single()
 
             if (error) throw error
             return data
         },
-        onSuccess: (data) => {
-            notify(`📌 New Lead: <b>${data.title}</b>`)
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "leads"] })
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
         },
@@ -79,7 +77,7 @@ export function useCreateLead() {
 
 export function useUpdateLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -87,8 +85,8 @@ export function useUpdateLead() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<LeadFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads")
-                .update(values)
+                .from("leads" as any)
+                .update(values as any)
                 .eq("id", id)
                 .select()
                 .single()
@@ -96,7 +94,7 @@ export function useUpdateLead() {
             if (error) throw error
             return data
         },
-        // Optimistic Update for Kanban Board
+        // Optimistic Update
         onMutate: async ({ id, values }) => {
             if (!workspaceId) return
             await queryClient.cancelQueries({ queryKey: ["workspace", workspaceId, "leads"] })
@@ -104,7 +102,7 @@ export function useUpdateLead() {
 
             if (previousLeads) {
                 queryClient.setQueryData<Lead[]>(["workspace", workspaceId, "leads"], (old) =>
-                    old ? old.map((lead) => (lead.id === id ? { ...lead, ...values } : lead)) : []
+                    old ? old.map((l) => (l.id === id ? { ...l, ...values } : l)) : []
                 )
             }
             return { previousLeads }
@@ -114,22 +112,16 @@ export function useUpdateLead() {
                 queryClient.setQueryData(["workspace", workspaceId, "leads"], context.previousLeads)
             }
         },
-        onSuccess: (data, variables) => {
-            if (variables.values.stage) {
-                notify(`📌 Lead moved: <b>${data.title}</b> → ${variables.values.stage}`)
-            }
-        },
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "leads"] })
             queryClient.invalidateQueries({ queryKey: ["lead"] })
-            queryClient.invalidateQueries({ queryKey: ["workspace", workspaceId, "dashboard"] })
         },
     })
 }
 
 export function useDeleteLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
+    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -137,7 +129,7 @@ export function useDeleteLead() {
         mutationFn: async (id: string) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { error } = await supabase
-                .from("leads")
+                .from("leads" as any)
                 .delete()
                 .eq("id", id)
 

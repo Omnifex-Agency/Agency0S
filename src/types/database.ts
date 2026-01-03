@@ -655,38 +655,47 @@ export type Database = {
                     created_at?: string
                 }
             }
-            activity_logs: {
+            activity_log: {
                 Row: {
                     id: string
                     workspace_id: string
-                    actor_id: string | null
+                    user_id: string | null
+                    user_name: string | null
                     action: string
                     entity_type: string
-                    entity_id: string | null
-                    before_state: any | null
-                    after_state: any | null
+                    entity_id: string
+                    entity_name: string | null
+                    client_id: string | null
+                    changes: any | null
+                    metadata: any | null
                     created_at: string
                 }
                 Insert: {
                     id?: string
                     workspace_id: string
-                    actor_id?: string | null
+                    user_id?: string | null
+                    user_name?: string | null
                     action: string
                     entity_type: string
-                    entity_id?: string | null
-                    before_state?: any | null
-                    after_state?: any | null
+                    entity_id: string
+                    entity_name?: string | null
+                    client_id?: string | null
+                    changes?: any | null
+                    metadata?: any | null
                     created_at?: string
                 }
                 Update: {
                     id?: string
                     workspace_id?: string
-                    actor_id?: string | null
+                    user_id?: string | null
+                    user_name?: string | null
                     action?: string
                     entity_type?: string
-                    entity_id?: string | null
-                    before_state?: any | null
-                    after_state?: any | null
+                    entity_id?: string
+                    entity_name?: string | null
+                    client_id?: string | null
+                    changes?: any | null
+                    metadata?: any | null
                     created_at?: string
                 }
             }
