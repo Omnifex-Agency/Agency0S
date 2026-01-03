@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
 import { TaskFormValues } from "@/lib/validations/task"
 import { useWorkspace } from "@/hooks/useWorkspace"
@@ -7,7 +7,6 @@ import { useWorkspace } from "@/hooks/useWorkspace"
 type Task = Database["public"]["Tables"]["tasks"]["Row"]
 
 export function useTasks(filters?: { clientId?: string; projectId?: string }) {
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -16,7 +15,7 @@ export function useTasks(filters?: { clientId?: string; projectId?: string }) {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             let query = supabase
-                .from("tasks" as any)
+                .from("tasks")
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -39,7 +38,6 @@ export function useTasks(filters?: { clientId?: string; projectId?: string }) {
 
 export function useCreateTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -47,12 +45,12 @@ export function useCreateTask() {
         mutationFn: async (values: TaskFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("tasks" as any)
+                .from("tasks")
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
                     due_date: values.due_date ? new Date(values.due_date).toISOString() : null,
-                } as any)
+                })
                 .select()
                 .single()
 
@@ -68,7 +66,6 @@ export function useCreateTask() {
 
 export function useUpdateTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -79,7 +76,7 @@ export function useUpdateTask() {
             if (values.due_date) updates.due_date = new Date(values.due_date).toISOString()
 
             const { data, error } = await supabase
-                .from("tasks" as any)
+                .from("tasks")
                 .update(updates as any)
                 .eq("id", id)
                 .select()
@@ -115,7 +112,6 @@ export function useUpdateTask() {
 
 export function useToggleTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -123,11 +119,11 @@ export function useToggleTask() {
         mutationFn: async ({ id, completed }: { id: string; completed: boolean }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("tasks" as any)
+                .from("tasks")
                 .update({
                     status: completed ? "completed" : "todo",
                     completed_at: completed ? new Date().toISOString() : null,
-                } as any)
+                })
                 .eq("id", id)
                 .select()
                 .single()
@@ -143,7 +139,6 @@ export function useToggleTask() {
 
 export function useDeleteTask() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -151,7 +146,7 @@ export function useDeleteTask() {
         mutationFn: async (id: string) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { error } = await supabase
-                .from("tasks" as any)
+                .from("tasks")
                 .delete()
                 .eq("id", id)
 

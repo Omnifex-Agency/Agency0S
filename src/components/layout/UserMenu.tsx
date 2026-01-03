@@ -12,11 +12,10 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 
 export function UserMenu() {
     const router = useRouter()
-    const supabase = createClient()
 
     const handleSignOut = async () => {
         await supabase.auth.signOut()

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 
 export type LogActivityParams = {
     action: string
@@ -11,7 +11,6 @@ export type LogActivityParams = {
 }
 
 export async function logActivity(params: LogActivityParams) {
-    const supabase = createClient() as any
 
     // Get current user
     const { data: { user } } = await supabase.auth.getUser()

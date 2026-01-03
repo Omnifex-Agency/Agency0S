@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { WorkspaceContext } from "@/hooks/useWorkspace"
 import { Database } from "@/types/database"
 import { Loader2 } from "lucide-react"
@@ -15,7 +15,6 @@ interface WorkspaceProviderProps {
 }
 
 export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
-    const supabase = createClient()
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null)
 
     // 1. Fetch User and Workspaces

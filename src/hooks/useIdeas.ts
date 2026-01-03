@@ -1,14 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
 import { IdeaFormValues } from "@/lib/validations/idea"
 import { useWorkspace } from "@/hooks/useWorkspace"
 import { logActivity } from "@/lib/logger"
 
 type Idea = Database["public"]["Tables"]["ideas"]["Row"]
+type IdeaInsert = Database["public"]["Tables"]["ideas"]["Insert"]
 
 export function useIdeas() {
-    const supabase = createClient()
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -30,7 +30,6 @@ export function useIdeas() {
 }
 
 export function useIdea(id: string) {
-    const supabase = createClient()
 
     return useQuery({
         queryKey: ["idea", id],
@@ -50,7 +49,6 @@ export function useIdea(id: string) {
 
 export function useCreateIdea() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -62,7 +60,7 @@ export function useCreateIdea() {
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                })
+                } satisfies IdeaInsert)
                 .select()
                 .single()
 
@@ -87,7 +85,6 @@ export function useCreateIdea() {
 
 export function useUpdateIdea() {
     const queryClient = useQueryClient()
-    const supabase = createClient()
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 

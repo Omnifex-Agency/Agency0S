@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { useWorkspace } from "@/hooks/useWorkspace"
 
 export function useActivityLog(filters?: { limit?: number; entityId?: string; entityType?: string }) {
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -13,7 +12,7 @@ export function useActivityLog(filters?: { limit?: number; entityId?: string; en
             if (!workspaceId) return []
 
             let query = supabase
-                .from("activity_log" as any)
+                .from("activity_log")
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })

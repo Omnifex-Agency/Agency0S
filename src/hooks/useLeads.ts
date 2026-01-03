@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
 import { LeadFormValues } from "@/lib/validations/lead"
 import { useWorkspace } from "@/hooks/useWorkspace"
@@ -7,7 +7,6 @@ import { useWorkspace } from "@/hooks/useWorkspace"
 type Lead = Database["public"]["Tables"]["leads"]["Row"]
 
 export function useLeads() {
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -16,7 +15,7 @@ export function useLeads() {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads" as any)
+                .from("leads")
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -29,13 +28,11 @@ export function useLeads() {
 }
 
 export function useLead(id: string) {
-    const supabase = createClient() as any
-
     return useQuery({
         queryKey: ["lead", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("leads" as any)
+                .from("leads")
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -49,7 +46,6 @@ export function useLead(id: string) {
 
 export function useCreateLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -57,11 +53,11 @@ export function useCreateLead() {
         mutationFn: async (values: LeadFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads" as any)
+                .from("leads")
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                } as any)
+                })
                 .select()
                 .single()
 
@@ -77,7 +73,6 @@ export function useCreateLead() {
 
 export function useUpdateLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -85,8 +80,8 @@ export function useUpdateLead() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<LeadFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("leads" as any)
-                .update(values as any)
+                .from("leads")
+                .update(values)
                 .eq("id", id)
                 .select()
                 .single()
@@ -121,7 +116,6 @@ export function useUpdateLead() {
 
 export function useDeleteLead() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -129,7 +123,7 @@ export function useDeleteLead() {
         mutationFn: async (id: string) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { error } = await supabase
-                .from("leads" as any)
+                .from("leads")
                 .delete()
                 .eq("id", id)
 

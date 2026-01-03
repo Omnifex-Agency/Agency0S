@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,6 @@ interface ResetPasswordFormProps extends React.HTMLAttributes<HTMLDivElement> { 
 
 export function ResetPasswordForm({ className, ...props }: ResetPasswordFormProps) {
     const router = useRouter()
-    const supabase = createClient()
     const [password, setPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2, Paperclip, Download, FileIcon, Trash2 } from "lucide-react"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { useToast } from "@/hooks/use-toast"
 
 interface Attachment {
@@ -25,8 +25,6 @@ export function AttachmentManager({ workspaceId, entityId, entityType }: Attachm
     const [uploading, setUploading] = useState(false)
     const [attachments, setAttachments] = useState<Attachment[]>([])
     const [loading, setLoading] = useState(false)
-
-    const supabase = createClient()
 
     const fetchAttachments = async () => {
         if (workspaceId === "TEST-MODE") return

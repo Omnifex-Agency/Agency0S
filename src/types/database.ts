@@ -202,7 +202,7 @@ export type Database = {
                 Insert: {
                     id?: string
                     workspace_id: string
-                    client_id: string
+                    client_id?: string | null
                     title: string
                     description?: string | null
                     stage?: string
@@ -357,9 +357,9 @@ export type Database = {
                 Insert: {
                     id?: string
                     workspace_id: string
-                    client_id: string
+                    client_id?: string | null
                     title: string
-                    type: string
+                    type?: string
                     status?: string
                     content?: any | null
                     owner_id?: string | null
@@ -370,7 +370,7 @@ export type Database = {
                 Update: {
                     id?: string
                     workspace_id?: string
-                    client_id?: string
+                    client_id?: string | null
                     title?: string
                     type?: string
                     status?: string
@@ -778,7 +778,13 @@ export type Database = {
             [_ in never]: never
         }
         Functions: {
-            [_ in never]: never
+            convert_target_to_client: {
+                Args: {
+                    p_target_id: string
+                    p_workspace_id: string
+                }
+                Returns: string
+            }
         }
         Enums: {
             [_ in never]: never

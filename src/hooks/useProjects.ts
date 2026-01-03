@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
 import { ProjectFormValues } from "@/lib/validations/project"
 import { useWorkspace } from "@/hooks/useWorkspace"
@@ -7,7 +7,6 @@ import { useWorkspace } from "@/hooks/useWorkspace"
 type Project = Database["public"]["Tables"]["projects"]["Row"]
 
 export function useProjects(clientId?: string) {
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -16,7 +15,7 @@ export function useProjects(clientId?: string) {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             let query = supabase
-                .from("projects" as any)
+                .from("projects")
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -35,13 +34,11 @@ export function useProjects(clientId?: string) {
 }
 
 export function useProject(id: string) {
-    const supabase = createClient() as any
-
     return useQuery({
         queryKey: ["project", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("projects" as any)
+                .from("projects")
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -55,7 +52,6 @@ export function useProject(id: string) {
 
 export function useCreateProject() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -67,13 +63,13 @@ export function useCreateProject() {
             const endDate = values.end_date ? new Date(values.end_date).toISOString() : null
 
             const { data, error } = await supabase
-                .from("projects" as any)
+                .from("projects")
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
                     start_date: startDate,
                     end_date: endDate,
-                } as any)
+                })
                 .select()
                 .single()
 
@@ -89,7 +85,6 @@ export function useCreateProject() {
 
 export function useUpdateProject() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -101,8 +96,8 @@ export function useUpdateProject() {
             if (values.end_date) updates.end_date = new Date(values.end_date).toISOString()
 
             const { data, error } = await supabase
-                .from("projects" as any)
-                .update(updates as any)
+                .from("projects")
+                .update(updates)
                 .eq("id", id)
                 .select()
                 .single()

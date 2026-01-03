@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { Database } from "@/types/database"
 import { TargetFormValues } from "@/lib/validations/target"
 import { useWorkspace } from "@/hooks/useWorkspace"
@@ -9,7 +9,6 @@ import { notify } from "@/app/(app)/notify/actions"
 type Target = Database["public"]["Tables"]["targets"]["Row"]
 
 export function useTargets() {
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -18,7 +17,7 @@ export function useTargets() {
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets" as any)
+                .from("targets")
                 .select("*")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
@@ -31,13 +30,11 @@ export function useTargets() {
 }
 
 export function useTarget(id: string) {
-    const supabase = createClient() as any
-
     return useQuery({
         queryKey: ["target", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("targets" as any)
+                .from("targets")
                 .select("*")
                 .eq("id", id)
                 .single()
@@ -51,7 +48,6 @@ export function useTarget(id: string) {
 
 export function useCreateTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -59,11 +55,11 @@ export function useCreateTarget() {
         mutationFn: async (values: TargetFormValues) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets" as any)
+                .from("targets")
                 .insert({
                     ...values,
                     workspace_id: workspaceId,
-                } as any)
+                })
                 .select()
                 .single()
 
@@ -89,7 +85,6 @@ export function useCreateTarget() {
 
 export function useCreateTargets() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -103,8 +98,8 @@ export function useCreateTargets() {
             }))
 
             const { data, error } = await supabase
-                .from("targets" as any)
-                .insert(toInsert as any)
+                .from("targets")
+                .insert(toInsert)
                 .select()
 
             if (error) throw error
@@ -131,7 +126,6 @@ export function useCreateTargets() {
 
 export function useUpdateTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -139,8 +133,8 @@ export function useUpdateTarget() {
         mutationFn: async ({ id, values }: { id: string; values: Partial<TargetFormValues> }) => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
-                .from("targets" as any)
-                .update(values as any)
+                .from("targets")
+                .update(values)
                 .eq("id", id)
                 .select()
                 .single()
@@ -180,7 +174,6 @@ export function useUpdateTarget() {
 
 export function useConvertTarget() {
     const queryClient = useQueryClient()
-    const supabase = createClient() as any
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
 
@@ -190,7 +183,7 @@ export function useConvertTarget() {
             const { data, error } = await supabase.rpc('convert_target_to_client', {
                 p_target_id: target.id,
                 p_workspace_id: workspaceId
-            } as any)
+            })
 
             if (error) throw error
             return data

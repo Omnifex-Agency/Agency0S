@@ -1,7 +1,7 @@
 "use client"
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { createClient } from "@/lib/supabase/client"
+import { supabase } from "@/lib/supabaseClient"
 import { useWorkspace } from "@/hooks/useWorkspace"
 import { useToast } from "@/hooks/use-toast"
 
@@ -29,20 +29,19 @@ export type NewResearchDoc = {
 
 export function useResearchDocs() {
     const { workspace } = useWorkspace()
-    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["research_docs", workspace?.id],
         queryFn: async () => {
             if (!workspace?.id) return []
             const { data, error } = await supabase
-                .from("research_docs" as any)
+                .from("research")
                 .select("*")
                 .eq("workspace_id", workspace.id)
                 .order("updated_at", { ascending: false })
 
             if (error) throw error
-            return data as ResearchDoc[]
+            return data as any
         },
         enabled: !!workspace?.id,
     })
@@ -50,7 +49,6 @@ export function useResearchDocs() {
 
 export function useCreateResearchDoc() {
     const { workspace } = useWorkspace()
-    const supabase = createClient() as any
     const queryClient = useQueryClient()
     const { toast } = useToast()
 
@@ -58,7 +56,7 @@ export function useCreateResearchDoc() {
         mutationFn: async (doc: NewResearchDoc) => {
             if (!workspace?.id) throw new Error("No workspace")
             const { data, error } = await supabase
-                .from("research_docs" as any)
+                .from("research")
                 .insert({
                     ...doc,
                     workspace_id: workspace.id,
@@ -84,26 +82,24 @@ export function useCreateResearchDoc() {
 }
 
 export function useResearchDoc(id: string) {
-    const supabase = createClient() as any
 
     return useQuery({
         queryKey: ["research_doc", id],
         queryFn: async () => {
             const { data, error } = await supabase
-                .from("research_docs" as any)
+                .from("research")
                 .select("*")
                 .eq("id", id)
                 .single()
 
             if (error) throw error
-            return data as ResearchDoc
+            return data as any
         },
         enabled: !!id,
     })
 }
 
 export function useUpdateResearchDoc() {
-    const supabase = createClient() as any
     const queryClient = useQueryClient()
     const { toast } = useToast()
 
@@ -117,7 +113,7 @@ export function useUpdateResearchDoc() {
                 .single()
 
             if (error) throw error
-            return data as ResearchDoc
+            return data as any
         },
         onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ["research_docs"] })
