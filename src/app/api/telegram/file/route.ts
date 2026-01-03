@@ -33,12 +33,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Attachment not found or access denied" }, { status: 404 })
         }
 
-        if ((attachment as any).storage_provider !== "telegram") {
+        if (attachment.storage_provider !== "telegram") {
             return NextResponse.json({ error: "Not a Telegram file" }, { status: 400 })
         }
-        tgFileId = (attachment as any).telegram_file_id
-        fileName = (attachment as any).file_name
-        mimeType = (attachment as any).mime_type || mimeType
+        tgFileId = attachment.telegram_file_id || ""
+        fileName = attachment.file_name
+        mimeType = attachment.mime_type || mimeType
     } else if (directTgId) {
         // Direct Test Mode access
         tgFileId = directTgId

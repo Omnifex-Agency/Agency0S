@@ -1,6 +1,63 @@
 export type Database = {
     public: {
         Tables: {
+            attachments: {
+                Row: {
+                    id: string
+                    workspace_id: string
+                    uploaded_by: string
+                    file_name: string
+                    file_extension: string | null
+                    mime_type: string
+                    size_bytes: number
+                    storage_provider: string
+                    telegram_file_id: string | null
+                    telegram_message_id: string | null
+                    target_id: string | null
+                    client_id: string | null
+                    task_id: string | null
+                    project_id: string | null
+                    research_doc_id: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    workspace_id: string
+                    uploaded_by: string
+                    file_name: string
+                    file_extension?: string | null
+                    mime_type: string
+                    size_bytes: number
+                    storage_provider: string
+                    telegram_file_id?: string | null
+                    telegram_message_id?: string | null
+                    target_id?: string | null
+                    client_id?: string | null
+                    task_id?: string | null
+                    project_id?: string | null
+                    research_doc_id?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    workspace_id?: string
+                    uploaded_by?: string
+                    file_name?: string
+                    file_extension?: string | null
+                    mime_type?: string
+                    size_bytes?: number
+                    storage_provider?: string
+                    telegram_file_id?: string | null
+                    telegram_message_id?: string | null
+                    target_id?: string | null
+                    client_id?: string | null
+                    task_id?: string | null
+                    project_id?: string | null
+                    research_doc_id?: string | null
+                    created_at?: string
+                }
+                Relationships: []
+            }
             workspaces: {
                 Row: {
                     id: string
@@ -23,6 +80,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             workspace_members: {
                 Row: {
@@ -46,6 +104,7 @@ export type Database = {
                     role?: 'owner' | 'admin' | 'member'
                     created_at?: string
                 }
+                Relationships: []
             }
             clients: {
                 Row: {
@@ -87,6 +146,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             contacts: {
                 Row: {
@@ -119,6 +179,7 @@ export type Database = {
                     is_primary?: boolean
                     created_at?: string
                 }
+                Relationships: []
             }
             leads: {
                 Row: {
@@ -172,6 +233,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             tasks: {
                 Row: {
@@ -228,6 +290,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             projects: {
                 Row: {
@@ -275,6 +338,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             research: {
                 Row: {
@@ -316,6 +380,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             notes: {
                 Row: {
@@ -360,6 +425,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
 
             target_research: {
@@ -396,6 +462,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             targets: {
                 Row: {
@@ -446,6 +513,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             ideas: {
                 Row: {
@@ -511,6 +579,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             onboarding_sessions: {
                 Row: {
@@ -549,6 +618,7 @@ export type Database = {
                     submitted_at?: string | null
                     approved_at?: string | null
                 }
+                Relationships: []
             }
             onboarding_sections: {
                 Row: {
@@ -584,6 +654,7 @@ export type Database = {
                     created_at?: string
                     updated_at?: string
                 }
+                Relationships: []
             }
             intake_files: {
                 Row: {
@@ -628,6 +699,7 @@ export type Database = {
                     size_bytes?: number | null
                     created_at?: string
                 }
+                Relationships: []
             }
             section_comments: {
                 Row: {
@@ -654,6 +726,7 @@ export type Database = {
                     content?: string
                     created_at?: string
                 }
+                Relationships: []
             }
             activity_log: {
                 Row: {
@@ -698,7 +771,20 @@ export type Database = {
                     metadata?: any | null
                     created_at?: string
                 }
+                Relationships: []
             }
+        }
+        Views: {
+            [_ in never]: never
+        }
+        Functions: {
+            [_ in never]: never
+        }
+        Enums: {
+            [_ in never]: never
+        }
+        CompositeTypes: {
+            [_ in never]: never
         }
     }
 }

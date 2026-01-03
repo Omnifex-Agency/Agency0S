@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
+import { Database } from "@/types/database"
 
 export async function POST(req: Request) {
     if (process.env.TELEGRAM_FILE_STORAGE !== "true") {
@@ -146,23 +147,22 @@ export async function POST(req: Request) {
             })
         }
 
-        const insertPayload: any = {
+        const insertPayload: Database['public']['Tables']['attachments']['Insert'] = {
             workspace_id: workspaceId,
             uploaded_by: user.id,
             file_name: fileName,
-            file_extension: fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() : null,
+            file_extension: fileName.includes('.') ? fileName.split('.').pop()?.toLowerCase() : undefined,
             mime_type: mimeType,
             size_bytes: fileSize,
             storage_provider: "telegram",
             telegram_file_id: fileId,
             telegram_message_id: messageId,
+            target_id: entityType === "target" ? entityId : undefined,
+            client_id: entityType === "client" ? entityId : undefined,
+            task_id: entityType === "task" ? entityId : undefined,
+            project_id: entityType === "project" ? entityId : undefined,
+            research_doc_id: entityType === "research" ? entityId : undefined,
         }
-
-        if (entityType === "target") insertPayload.target_id = entityId
-        if (entityType === "client") insertPayload.client_id = entityId
-        if (entityType === "task") insertPayload.task_id = entityId
-        if (entityType === "project") insertPayload.project_id = entityId
-        if (entityType === "research") insertPayload.research_doc_id = entityId
 
         const { data: attachment, error: dbError } = await supabase
             .from("attachments")

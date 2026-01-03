@@ -32,19 +32,19 @@ export function AttachmentManager({ workspaceId, entityId, entityType }: Attachm
         if (workspaceId === "TEST-MODE") return
 
         setLoading(true)
-        let query = supabase
+        let query: any = supabase
             .from("attachments")
             .select("id, file_name, created_at, size_bytes, telegram_file_id")
             .eq("workspace_id", workspaceId)
 
         if (entityType !== "none" && entityId) {
-            query = query.eq(`${entityType}_id`, entityId)
+            query = query.eq(`${entityType}_id` as any, entityId)
         } else {
-            query = query.is("target_id", null)
-                .is("client_id", null)
-                .is("task_id", null)
-                .is("project_id", null)
-                .is("research_doc_id", null)
+            // Type-safe approach to check multiple nulls without infinite recursion
+            const nullFilters = ["target_id", "client_id", "task_id", "project_id", "research_doc_id"]
+            nullFilters.forEach(f => {
+                query = query.is(f as any, null)
+            })
         }
 
         const { data, error } = await query.order("created_at", { ascending: false })
