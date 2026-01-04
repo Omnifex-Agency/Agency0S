@@ -18,7 +18,8 @@ import {
     Bot,
     Gavel,
     BrainCircuit,
-    Database
+    Database,
+    Key
 } from "lucide-react"
 
 const sidebarItems = [
@@ -46,6 +47,11 @@ const sidebarItems = [
         title: "Ideas Hub",
         href: "/app/ideas",
         icon: Lightbulb,
+    },
+    {
+        title: "Credentials",
+        href: "/app/credentials",
+        icon: Key,
     },
     {
         title: "Brainstorm",

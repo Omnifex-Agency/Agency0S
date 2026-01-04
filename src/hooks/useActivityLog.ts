@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/client"
 import { useWorkspace } from "@/hooks/useWorkspace"
 
 export function useActivityLog(filters?: { limit?: number; entityId?: string; entityType?: string }) {
     const { workspace } = useWorkspace()
     const workspaceId = workspace?.id
+    const supabase = createClient()
 
     return useQuery({
         queryKey: ["workspace", workspaceId, "activity", filters],

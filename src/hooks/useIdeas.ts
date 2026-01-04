@@ -25,16 +25,17 @@ export function useIdeas() {
     return useQuery<Idea[]>({
         queryKey: ["workspace", workspaceId, "ideas"],
         enabled: !!workspaceId,
+        staleTime: 5 * 60 * 1000,
         queryFn: async () => {
             if (!workspaceId) throw new Error("Workspace ID missing")
             const { data, error } = await supabase
                 .from("ideas")
-                .select("*")
+                .select("id, workspace_id, title, status, template_type, tags, created_at, owner_id, related_client_id, related_project_id")
                 .eq("workspace_id", workspaceId)
                 .order("created_at", { ascending: false })
 
             if (error) throw error
-            return data ?? []
+            return data as unknown as Idea[]
         },
     })
 }
@@ -43,6 +44,7 @@ export function useIdea(id: string) {
     return useQuery<Idea>({
         queryKey: ["idea", id],
         enabled: !!id,
+        staleTime: 5 * 60 * 1000,
         queryFn: async () => {
             const { data, error } = await supabase
                 .from("ideas")

@@ -12,10 +12,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/client"
 
 export function UserMenu() {
     const router = useRouter()
+    const supabase = createClient()
 
     const handleSignOut = async () => {
         await supabase.auth.signOut()
@@ -28,7 +29,7 @@ export function UserMenu() {
             <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                        <AvatarImage src="/avatars/01.png" alt="@user" />
+                        <AvatarImage alt="@user" />
                         <AvatarFallback>U</AvatarFallback>
                     </Avatar>
                 </Button>

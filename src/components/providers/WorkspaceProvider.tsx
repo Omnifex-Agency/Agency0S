@@ -2,7 +2,7 @@
 
 import { useEffect, useState, ReactNode } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/client"
 import { WorkspaceContext } from "@/hooks/useWorkspace"
 import { Database } from "@/types/database"
 import { Loader2 } from "lucide-react"
@@ -15,6 +15,7 @@ interface WorkspaceProviderProps {
 }
 
 export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
+    const supabase = createClient()
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<string | null>(null)
 
     // 1. Fetch User and Workspaces
@@ -26,22 +27,18 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
 
             const { data: members, error: memberError } = await supabase
                 .from("workspace_members")
-                .select("workspace_id")
-                .eq("user_id", user.id)
+                .select("role, workspace:workspaces(*)")
+                .eq("user_id", user.id) as any
 
             if (memberError) throw memberError
-            if (!members || members.length === 0) return []
 
-            const workspaceIds = (members as any[]).map(m => m.workspace_id)
+            // Flatten the structure to return just the workspaces
+            // Filter out any null workspaces (in case of referential integrity issues)
+            const workspaces = members
+                ?.map(m => m.workspace)
+                .filter((w): w is Workspace => w !== null && typeof w === 'object') || []
 
-            const { data: workspacesData, error: wsError } = await supabase
-                .from("workspaces")
-                .select("*")
-                .in("id", workspaceIds)
-                .order("created_at")
-
-            if (wsError) throw wsError
-            return workspacesData as Workspace[]
+            return workspaces.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
         },
         retry: false,
     })

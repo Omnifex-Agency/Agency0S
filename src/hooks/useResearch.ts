@@ -36,14 +36,15 @@ export function useResearchDocs() {
             if (!workspace?.id) return []
             const { data, error } = await supabase
                 .from("research")
-                .select("*")
+                .select("id, workspace_id, title, type, target_id, client_id, project_id, created_at, updated_at")
                 .eq("workspace_id", workspace.id)
                 .order("updated_at", { ascending: false })
 
             if (error) throw error
-            return data as any
+            return data as any // Partial research doc
         },
         enabled: !!workspace?.id,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 }
 
@@ -96,6 +97,7 @@ export function useResearchDoc(id: string) {
             return data as any
         },
         enabled: !!id,
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 }
 

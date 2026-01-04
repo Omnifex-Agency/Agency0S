@@ -3,8 +3,12 @@ import { NextResponse } from "next/server"
 import { Database } from "@/types/database"
 
 export async function POST(req: Request) {
-    if (process.env.TELEGRAM_FILE_STORAGE !== "true") {
-        return NextResponse.json({ error: "Feature disabled" }, { status: 403 })
+    // Check feature flag or if tokens are present
+    if (process.env.TELEGRAM_FILE_STORAGE === "false") {
+        return NextResponse.json({ error: "Feature explicitly disabled" }, { status: 403 })
+    }
+    if (!process.env.TELEGRAM_BOT_TOKEN) {
+        return NextResponse.json({ error: "Telegram Bot Token missing" }, { status: 500 })
     }
 
     try {
