@@ -25,20 +25,26 @@ export function WorkspaceProvider({ children }: WorkspaceProviderProps) {
             const { data: { user }, error: userError } = await supabase.auth.getUser()
             if (userError || !user) throw new Error("Not authenticated")
 
+            // 1. Get workspace IDs
             const { data: members, error: memberError } = await supabase
                 .from("workspace_members")
-                .select("role, workspace:workspaces(*)")
-                .eq("user_id", user.id) as any
+                .select("workspace_id")
+                .eq("user_id", user.id)
 
             if (memberError) throw memberError
+            if (!members || members.length === 0) return []
 
-            // Flatten the structure to return just the workspaces
-            // Filter out any null workspaces (in case of referential integrity issues)
-            const workspaces = members
-                ?.map(m => m.workspace)
-                .filter((w): w is Workspace => w !== null && typeof w === 'object') || []
+            const workspaceIds = members.map(m => m.workspace_id)
 
-            return workspaces.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+            // 2. Fetch Workspaces
+            const { data: workspacesData, error: wsError } = await supabase
+                .from("workspaces")
+                .select("*")
+                .in("id", workspaceIds)
+                .order("created_at")
+
+            if (wsError) throw wsError
+            return workspacesData as Workspace[]
         },
         retry: false,
     })

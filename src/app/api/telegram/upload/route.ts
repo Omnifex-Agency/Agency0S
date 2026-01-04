@@ -43,18 +43,24 @@ export async function POST(req: Request) {
             }
 
             const fileEntry = formData.get("file")
+
+            // Check if user is null before accessing user.id
+            if (!user) {
+                return NextResponse.json({ error: "User session not found" }, { status: 401 })
+            }
+
             workspaceId = formData.get("workspaceId") as string
             entityType = formData.get("entityType") as string
             entityId = formData.get("entityId") as string
 
-            if (!fileEntry || typeof fileEntry === "string") {
-                return NextResponse.json({ error: "Invalid file" }, { status: 400 })
+            if (!fileEntry || !(fileEntry instanceof File)) {
+                return NextResponse.json({ error: "Invalid file object" }, { status: 400 })
             }
-            const file = fileEntry as File
-            fileBlob = file
+            const file = fileEntry
             fileName = file.name
             mimeType = file.type
             fileSize = file.size
+            fileBlob = file
         }
         // Strategy 2: Raw Body (Fallback for large files/video)
         else {
