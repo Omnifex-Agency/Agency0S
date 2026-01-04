@@ -3,7 +3,7 @@
 import * as React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { supabase } from "@/lib/supabaseClient"
+import { createClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -15,6 +15,7 @@ interface AuthFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 export function AuthForm({ view, className, ...props }: AuthFormProps) {
+    const supabase = createClient()
     const router = useRouter()
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
@@ -30,7 +31,7 @@ export function AuthForm({ view, className, ...props }: AuthFormProps) {
         try {
             if (view === "signup") {
                 const { error } = await supabase.auth.signUp({
-                    email,
+                    email: email.trim(),
                     password,
                     options: {
                         data: {
@@ -44,7 +45,7 @@ export function AuthForm({ view, className, ...props }: AuthFormProps) {
                 router.push("/login?message=Check your email to confirm your account")
             } else {
                 const { error } = await supabase.auth.signInWithPassword({
-                    email,
+                    email: email.trim(),
                     password,
                 })
                 if (error) throw error
@@ -52,7 +53,8 @@ export function AuthForm({ view, className, ...props }: AuthFormProps) {
                 router.push("/app") // Redirect to main dashboard (we'll implement this route later)
             }
         } catch (err: any) {
-            setError(err.message)
+            console.error("Auth error:", err)
+            setError(err.message || "An error occurred during authentication")
         } finally {
             setIsLoading(false)
         }
