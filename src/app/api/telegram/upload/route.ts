@@ -116,7 +116,6 @@ export async function POST(req: Request) {
         if (!tgRes.ok) {
             const errText = await tgRes.text()
             console.error("[TelegramUpload] Telegram API Error:", errText)
-
             if (errText.includes("chat not found")) {
                 return NextResponse.json({
                     error: "Telegram Chat Not Found",
@@ -124,7 +123,6 @@ export async function POST(req: Request) {
                     code: "CHAT_NOT_FOUND"
                 }, { status: 400 })
             }
-
             return NextResponse.json({ error: `Telegram Error: ${errText}` }, { status: 502 })
         }
 
