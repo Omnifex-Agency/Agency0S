@@ -58,7 +58,6 @@ export async function GET(req: Request) {
 
         const filePath = pathData.result.file_path
 
-<<<<<<< HEAD
         // Default to detected extension if filename is generic "test-file" or "download.bin"
         if ((!fileName || fileName === "test-file" || fileName === "download.bin") && filePath.includes('.')) {
             const ext = filePath.split('.').pop()
@@ -76,9 +75,6 @@ export async function GET(req: Request) {
                 }
             }
         }
-
-=======
->>>>>>> 08ff68dfbc9f5bcb9a3e23479d3bdaa8f523a9f7
         // 3. Proxy download
         const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`
         const fileRes = await fetch(downloadUrl)
