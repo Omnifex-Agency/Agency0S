@@ -16,18 +16,22 @@ import {
     Settings,
     Target,
     Lightbulb,
-    Bot,
-    Gavel,
     BrainCircuit,
     Database,
     Key,
+<<<<<<< HEAD
     ChevronLeft,
     ChevronRight,
     LogOut
+=======
+    Bot,
+    Gavel
+>>>>>>> cbd75e5 (feat: enhance auth UI with light theme, role-based setup, and UI component fixes)
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 const sidebarItems = [
+<<<<<<< HEAD
     { title: "Dashboard", href: "/app", icon: LayoutDashboard },
     { title: "Targets", href: "/app/targets", icon: Target },
     { title: "Pipeline", href: "/app/pipeline", icon: KanbanSquare },
@@ -41,6 +45,68 @@ const sidebarItems = [
     { title: "Research", href: "/app/research", icon: FlaskConical },
     { title: "Notes", href: "/app/notes", icon: StickyNote },
     { title: "Notifications", href: "/app/settings/notifications", icon: Bot },
+=======
+    {
+        title: "Overview",
+        href: "/app",
+        icon: LayoutDashboard,
+    },
+    {
+        title: "Targets",
+        href: "/app/targets",
+        icon: Target,
+    },
+    {
+        title: "Pipeline",
+        href: "/app/pipeline",
+        icon: KanbanSquare,
+    },
+    {
+        title: "Clients",
+        href: "/app/clients",
+        icon: Users,
+    },
+    {
+        title: "Ideas Hub",
+        href: "/app/ideas",
+        icon: Lightbulb,
+    },
+    {
+        title: "Credentials",
+        href: "/app/credentials",
+        icon: Key,
+    },
+    {
+        title: "Brainstorm",
+        href: "/app/storm",
+        icon: BrainCircuit,
+    },
+    {
+        title: "Decisions",
+        href: "/app/decisions",
+        icon: Gavel,
+    },
+    {
+        title: "Projects",
+        href: "/app/projects",
+        icon: FolderKanban,
+    },
+    {
+        title: "Tasks",
+        href: "/app/tasks",
+        icon: CheckSquare,
+    },
+    {
+        title: "Research",
+        href: "/app/research",
+        icon: FlaskConical,
+    },
+    {
+        title: "Notes",
+        href: "/app/notes",
+        icon: StickyNote,
+    },
+>>>>>>> cbd75e5 (feat: enhance auth UI with light theme, role-based setup, and UI component fixes)
 ]
 
 export function Sidebar() {
@@ -48,6 +114,7 @@ export function Sidebar() {
     const [isCollapsed, setIsCollapsed] = React.useState(false)
 
     return (
+<<<<<<< HEAD
         <motion.div
             initial={{ width: 280 }}
             animate={{ width: isCollapsed ? 80 : 280 }}
@@ -89,11 +156,27 @@ export function Sidebar() {
                 <div className="space-y-1">
                     {sidebarItems.map((item, index) => {
                         const isActive = pathname === item.href
+=======
+        <aside className="w-64 bg-background border-r border-border flex flex-col">
+            {/* Logo/Brand */}
+            <div className="h-16 flex items-center px-6 border-b border-border">
+                <h1 className="text-xl font-semibold text-foreground tracking-tight">Agency OS</h1>
+            </div>
+
+            {/* Navigation */}
+            <div className="flex-1 overflow-y-auto px-4 py-6">
+                <nav className="space-y-1">
+                    {sidebarItems.map((item) => {
+                        const isActive = pathname === item.href;
+                        const Icon = item.icon;
+
+>>>>>>> cbd75e5 (feat: enhance auth UI with light theme, role-based setup, and UI component fixes)
                         return (
                             <Link
-                                key={index}
+                                key={item.title}
                                 href={item.href}
                                 className={cn(
+<<<<<<< HEAD
                                     "flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-200 group relative",
                                     isActive
                                         ? "bg-slate-800/50 text-white"
@@ -151,5 +234,60 @@ export function Sidebar() {
                 </Link>
             </div>
         </motion.div>
+=======
+                                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                    isActive
+                                        ? "bg-primary/10 text-primary"
+                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                )}
+                            >
+                                <Icon className={cn("w-4.5 h-4.5", isActive ? "text-primary" : "text-muted-foreground")} />
+                                <span>{item.title}</span>
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </div>
+
+            {/* Footer Navigation */}
+            <div className="p-4 border-t border-slate-200 space-y-1">
+                <Link
+                    href="/app/settings/notifications"
+                    className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                        pathname === "/app/settings/notifications" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                    )}
+                >
+                    <Bot className="w-4.5 h-4.5" />
+                    <span>Telegram</span>
+                </Link>
+                <Link
+                    href="/app/settings/data"
+                    className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                        pathname === "/app/settings/data" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                    )}
+                >
+                    <Database className="w-4.5 h-4.5" />
+                    <span>Data & Backup</span>
+                </Link>
+                <Link
+                    href="/app/settings"
+                    className={cn(
+                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all",
+                        pathname === "/app/settings" ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted"
+                    )}
+                >
+                    <Settings className="w-4.5 h-4.5" />
+                    <span>Settings</span>
+                </Link>
+
+                <div className="mt-4 px-3 py-2 bg-slate-50 rounded-lg">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin Access</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">Management Workspace</p>
+                </div>
+            </div>
+        </aside>
+>>>>>>> cbd75e5 (feat: enhance auth UI with light theme, role-based setup, and UI component fixes)
     )
 }

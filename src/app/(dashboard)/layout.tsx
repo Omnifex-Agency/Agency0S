@@ -9,6 +9,7 @@ export default function DashboardLayout({
 }) {
     return (
         <WorkspaceProvider>
+<<<<<<< HEAD
             <div className="flex min-h-screen w-full bg-[#0f172a] text-slate-50 font-sans selection:bg-indigo-500/30">
                 <Sidebar />
                 <div className="flex flex-1 flex-col overflow-hidden">
@@ -21,6 +22,14 @@ export default function DashboardLayout({
                         </div>
 
                         <div className="relative z-10 max-w-7xl mx-auto space-y-6">
+=======
+            <div className="flex h-screen bg-slate-50 overflow-hidden">
+                <Sidebar />
+                <div className="flex-1 flex flex-col min-w-0">
+                    <Topbar />
+                    <main className="flex-1 overflow-y-auto">
+                        <div className="p-6 md:p-8">
+>>>>>>> cbd75e5 (feat: enhance auth UI with light theme, role-based setup, and UI component fixes)
                             {children}
                         </div>
                     </main>
