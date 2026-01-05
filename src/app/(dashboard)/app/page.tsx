@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Users, CreditCard, Activity, DollarSign, TrendingUp, Target, FolderKanban, CheckCircle2 } from "lucide-react"
 import { RecentActivity } from "@/components/dashboard/RecentActivity"
 import { StatusCard } from "@/components/client/StatusCard"
+import { useDashboardStats } from "@/hooks/useDashboardStats"
 import { motion } from "framer-motion"
 import {
     AreaChart,
@@ -41,6 +42,15 @@ const itemVariants = {
 }
 
 export default function AdminDashboardPage() {
+    const { data: stats, isLoading } = useDashboardStats()
+
+    const formatCurrency = (value: number) => {
+        if (value >= 1000) {
+            return `$${(value / 1000).toFixed(1)}k`
+        }
+        return `$${value}`
+    }
+
     return (
         <motion.div
             className="flex flex-col gap-8"
@@ -60,36 +70,36 @@ export default function AdminDashboardPage() {
                     <StatusCard
                         icon={Target}
                         label="Total Targets"
-                        value="24"
+                        value={isLoading ? "-" : stats?.targets.toString() || "0"}
                         status="in-progress"
-                        subtitle="8 ready to pitch"
+                        subtitle="Pipeline prospects"
                     />
                 </motion.div>
                 <motion.div variants={itemVariants}>
                     <StatusCard
                         icon={FolderKanban}
                         label="Active Projects"
-                        value="12"
+                        value={isLoading ? "-" : stats?.activeProjects.toString() || "0"}
                         status="on-track"
-                        subtitle="All systems healthy"
+                        subtitle="Currently in progress"
                     />
                 </motion.div>
                 <motion.div variants={itemVariants}>
                     <StatusCard
                         icon={Users}
-                        label="Client Entities"
-                        value="8"
+                        label="Active Clients"
+                        value={isLoading ? "-" : stats?.clients.toString() || "0"}
                         status="completed"
-                        subtitle="2 recently onboarded"
+                        subtitle="Revenue generating"
                     />
                 </motion.div>
                 <motion.div variants={itemVariants}>
                     <StatusCard
                         icon={DollarSign}
-                        label="Monthly Revenue"
-                        value="$42.5k"
+                        label="Project Value"
+                        value={isLoading ? "-" : formatCurrency(stats?.revenue || 0)}
                         status="on-track"
-                        subtitle="+12% from last month"
+                        subtitle="Total active budget"
                     />
                 </motion.div>
             </div>
@@ -116,7 +126,7 @@ export default function AdminDashboardPage() {
                         <CardContent className="p-6 pt-10">
                             <div className="h-[350px]">
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                    <AreaChart data={stats?.chartData || chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                                         <defs>
                                             <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset="5%" stopColor="#6366f1" stopOpacity={0.15} />

@@ -35,10 +35,18 @@ export default function LoginForm() {
     const handleAutoSetup = async () => {
         setIsSettingUp(true);
         setError(null);
+        const demoEmail = 'testclient@agency.os';
+        const demoPassword = 'Password123!';
+
+        // Pre-fill fields for user convenience
+        setEmail(demoEmail);
+        setPassword(demoPassword);
+
         try {
+            // 1. Try to sign up first
             const { error: signUpError } = await supabase.auth.signUp({
-                email: 'testclient@agency.os',
-                password: 'Password123!',
+                email: demoEmail,
+                password: demoPassword,
                 options: {
                     data: {
                         full_name: 'Test Client',
@@ -46,10 +54,38 @@ export default function LoginForm() {
                     }
                 }
             });
-            if (signUpError) throw signUpError;
-            alert("Test account created successfully! You can now sign in.");
+
+            if (signUpError) {
+                // 2. If user already exists, that's fine - we provided the credentials to login
+                // We just check if the error is "User already registered" kind of thing
+                // But generally, if signup fails, we can assume the user might exist or the password is weak (unlikely for this specific string)
+                console.log("Signup returned error (likely active user):", signUpError.message);
+            }
+
+            // 3. Just try to sign in immediately after "setup" to verify access
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: demoEmail,
+                password: demoPassword,
+            });
+
+            if (signInError) {
+                // If sign in ALSO fails, then there is a real problem (e.g. wrong password for existing user, or connection issue)
+                throw signInError;
+            }
+
+            // Success
+            alert("Test access confirmed! Logging you in...");
+            router.push("/client");
+            router.refresh();
+
         } catch (err: any) {
-            setError(err.message || "Setup failed. The user might already exist.");
+            console.error("Auto setup error:", err);
+            // More friendly error message
+            if (err.message.includes("already registered")) {
+                setError("Test user already exists. Just click 'Sign in'.");
+            } else {
+                setError(err.message || "Setup failed.");
+            }
         } finally {
             setIsSettingUp(false);
         }
