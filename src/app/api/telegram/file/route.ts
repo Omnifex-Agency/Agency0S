@@ -58,6 +58,23 @@ export async function GET(req: Request) {
 
         const filePath = pathData.result.file_path
 
+        // Default to detected extension if filename is generic "test-file" or "download.bin"
+        if ((!fileName || fileName === "test-file" || fileName === "download.bin") && filePath.includes('.')) {
+            const ext = filePath.split('.').pop()
+            if (ext) {
+                // Determine base name
+                const base = fileName === "download.bin" ? "download" : "file"
+                fileName = `${base}.${ext}`
+
+                // Refine mime type based on extension if still generic
+                if (mimeType === "application/octet-stream") {
+                    if (ext === "pdf") mimeType = "application/pdf"
+                    if (ext === "jpg" || ext === "jpeg") mimeType = "image/jpeg"
+                    if (ext === "png") mimeType = "image/png"
+                    if (ext === "webp") mimeType = "image/webp"
+                }
+            }
+        }
         // 3. Proxy download
         const downloadUrl = `https://api.telegram.org/file/bot${token}/${filePath}`
         const fileRes = await fetch(downloadUrl)

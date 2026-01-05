@@ -80,7 +80,7 @@ export function AttachmentManager({ workspaceId, entityId, entityType }: Attachm
 
             if (!res.ok) {
                 const errData = await res.json().catch(() => ({}))
-                throw new Error(errData.details || res.statusText)
+                throw new Error(errData.error || errData.details || res.statusText)
             }
 
             const data = await res.json()
@@ -95,7 +95,9 @@ export function AttachmentManager({ workspaceId, entityId, entityType }: Attachm
             console.error("Upload Error:", error)
             toast({
                 title: "Upload failed",
-                description: error.message || "Ensure file storage is enabled.",
+                description: error.message === "Telegram Chat Not Found"
+                    ? "Start the bot @myagencyosbot in Telegram first!"
+                    : (error.message || "Ensure file storage is enabled."),
                 variant: "destructive"
             })
         } finally {
@@ -106,7 +108,8 @@ export function AttachmentManager({ workspaceId, entityId, entityType }: Attachm
 
     const handleDownload = (file: Attachment) => {
         if (workspaceId === "TEST-MODE" && file.telegram_file_id) {
-            window.open(`/api/telegram/file?tg_id=${file.telegram_file_id}`, "_blank")
+            const nameParam = encodeURIComponent(file.file_name)
+            window.open(`/api/telegram/file?tg_id=${file.telegram_file_id}&filename=${nameParam}`, "_blank")
         } else {
             window.open(`/api/telegram/file?id=${file.id}`, "_blank")
         }
